@@ -60,19 +60,22 @@
   (config-size EGLint)
   (num-config (:pointer EGLint)))
 
-(defun choose-config (display config-size &rest config-attribs)
+(defun choose-config (display &rest config-attribs)
   (with-foreign-objects
       ((requested-attribs 'EGLint (length config-attribs))
        (available-configs '(:pointer EGLConfig) 1)
-       (num-configs 'EGLint 1))
+       (num-configs 'EGLint 1)
+       (config-size 'EGLint 0))
+    (eglchooseconfig display requested-attribs (cffi:null-pointer) 0 num-configs)
+    (setf config-size num-configs)
     (loop :for i :from 0 :to (- (length config-attribs) 1)
-       :do (setf (mem-aref requested-attribs 'EGLint i)
-		 (if (keywordp (nth i config-attribs))
-		     (foreign-enum-value 'eglenum (nth i config-attribs))
-		     (nth i config-attribs))))
+	  :do (setf (mem-aref requested-attribs 'EGLint i)
+		    (if (keywordp (nth i config-attribs))
+			(foreign-enum-value 'eglenum (nth i config-attribs))
+			(nth i config-attribs))))
     (eglchooseconfig display requested-attribs available-configs config-size num-configs)
     (loop :for i :from 0 :to (- (mem-aref num-configs 'EGLint) 1)
-       :collecting (mem-aref available-configs :pointer i))))
+	  :collecting (mem-aref available-configs :pointer i))))
 
 (defcfun "eglCreateContext" EGLContext
   (display EGLDisplay)
@@ -104,7 +107,7 @@
 
 (defun bind-api (api)
   (eglbindapi (foreign-enum-value 'eglenum api)))
-  
+
 (defcfun ("eglMakeCurrent" make-current) EGLBoolean
   (display EGLDisplay)
   (draw EGLSurface)

@@ -21,6 +21,5 @@
    bind-wayland-display
    query-wayland-buffer
    image-target-texture-2DOES
+   eglintor
    EGLenum))
-
-

@@ -151,7 +151,7 @@
 (defcfun ("eglGetProcAddress" get-proc-address) :pointer
   (name :string))
 
-(defvar *query-wayland-buffer* nil)
+(defvar *query-wayland-display* nil)
 (defvar *bind-wayland-display* nil)
 (defvar *image-target-texture-2DOES* nil)
 

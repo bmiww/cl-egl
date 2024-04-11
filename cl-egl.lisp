@@ -37,7 +37,13 @@
   (:color-buffer-type #x303F)
   (:rgb-buffer #x308E)
   (:egl-platform-gbm-khr #x31D7)
+  (:dma-buf-plane-fd-ext #x3272)
+  (:linux-drm-fourcc-ext #x3271)
+  (:dma-buf-plane0-pitch-ext #x3274)
+  (:dma-buf-plane0-offset-ext #x3273)
   (:none #x3038))
+
+(defvar LINUX_DMA_BUF_EXT #x3270)
 
 (defun eglintor (&rest args)
   (apply 'logior (mapcar (lambda (x) (foreign-enum-value 'eglenum x)) args)))
@@ -58,8 +64,7 @@
        (minor 'EGLint 1))
     (when (= (eglInitialize display major minor) 0)
       (terminate display)
-      (error "Failed to initialize EGL with code ~d" (get-error))
-      )
+      (error "Failed to initialize EGL with code ~d" (get-error)))
     (format t "~A~%" (get-error))
     (values (mem-aref major 'EGLint)
 	    (mem-aref minor 'EGLint))))
@@ -154,11 +159,13 @@
 (defvar *query-wayland-display* nil)
 (defvar *bind-wayland-display* nil)
 (defvar *image-target-texture-2DOES* nil)
+(defvar *create-image-khr* nil)
 
 (defun init-egl-wayland ()
   (setf *bind-wayland-display* (get-proc-address "eglBindWaylandDisplayWL"))
   (setf *query-wayland-display* (get-proc-address "eglQueryWaylandBufferWL"))
-  (setf *image-target-texture-2DOES* (get-proc-address "glEGLImageTargetTexture2DOES")))
+  (setf *image-target-texture-2DOES* (get-proc-address "glEGLImageTargetTexture2DOES"))
+  (setf *create-image-khr* (get-proc-address "eglCreateImageKHR")))
 
 (defun bind-wayland-display (egl-display wl-display)
   (foreign-funcall-pointer *bind-wayland-display* ()
@@ -179,3 +186,19 @@
 			   EGLint attribute
 			   :pointer egl-image
 			   :void))
+
+(defun create-image-khr (display context target buffer &rest attribs)
+  (with-foreign-objects
+      ((requested-attribs 'EGLint (length attribs)))
+    (loop :for i :from 0 :to (- (length attribs) 1)
+	  :do (setf (mem-aref requested-attribs 'EGLint i)
+		    (if (keywordp (nth i attribs))
+			(foreign-enum-value 'eglenum (nth i attribs))
+			(nth i attribs))))
+    (foreign-funcall-pointer *create-image-khr* ()
+			     :pointer display
+			     :pointer context
+			     EGLint target
+			     :pointer buffer
+			     :pointer requested-attribs
+			     :pointer)))

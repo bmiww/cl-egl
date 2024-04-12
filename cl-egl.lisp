@@ -41,6 +41,24 @@
   (:linux-drm-fourcc-ext #x3271)
   (:dma-buf-plane0-pitch-ext #x3274)
   (:dma-buf-plane0-offset-ext #x3273)
+
+  ;; ERROR CODES
+  (:success #x3000)
+  (:not-initialized #x3001)
+  (:bad-access #x3002)
+  (:bad-alloc #x3003)
+  (:bad-attribute #x3004)
+  (:bad-config #x3005)
+  (:bad-context #x3006)
+  (:bad-current-surface #x3007)
+  (:bad-display #x3008)
+  (:bad-match #x3009)
+  (:bad-native-pixmap #x300A)
+  (:bad-native-window #x300B)
+  (:bad-parameter #x300C)
+  (:bad-surface #x300D)
+  (:context-lost #x300E)
+
   (:none #x3038))
 
 (defvar LINUX_DMA_BUF_EXT #x3270)
@@ -48,7 +66,8 @@
 (defun eglintor (&rest args)
   (apply 'logior (mapcar (lambda (x) (foreign-enum-value 'eglenum x)) args)))
 
-(defcfun ("eglGetError" get-error) EGLint)
+(defcfun ("eglGetError" get-error-internal) EGLint)
+(defun get-error () (foreign-enum-keyword 'eglenum (get-error-internal)))
 
 (defcfun ("eglGetDisplay" get-display) EGLDisplay
   (display-id :pointer))
@@ -92,6 +111,8 @@
       (eglchooseconfig display requested-attribs available-configs config-size num-configs)
       (loop :for i :from 0 :to (- (mem-aref num-configs 'EGLint) 1)
 	    :collecting (mem-aref available-configs :pointer i)))))
+
+(defcfun ("eglGetCurrentContext" get-current-context) EGLContext)
 
 (defcfun "eglCreateContext" EGLContext
   (display EGLDisplay)

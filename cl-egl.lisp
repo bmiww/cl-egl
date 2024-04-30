@@ -179,16 +179,27 @@
 
 (defvar *query-wayland-display* nil)
 (defvar *bind-wayland-display* nil)
+(defvar *unbind-wayland-display* nil)
 (defvar *image-target-texture-2DOES* nil)
 (defvar *create-image-khr* nil)
 
-(defun init-egl-wayland ()
-  (setf *bind-wayland-display* (get-proc-address "eglBindWaylandDisplayWL"))
-  (setf *query-wayland-display* (get-proc-address "eglQueryWaylandBufferWL"))
-  (setf *image-target-texture-2DOES* (get-proc-address "glEGLImageTargetTexture2DOES"))
-  (setf *create-image-khr* (get-proc-address "eglCreateImageKHR")))
+(defmacro setfnot (place value)
+  `(unless ,place (setf ,place ,value)))
 
-(defun bind-wayland-display (egl-display wl-display)
+(defun load-egl-extensions ()
+  (setfnot *bind-wayland-display* (get-proc-address "eglBindWaylandDisplayWL"))
+  (setfnot *unbind-wayland-display* (get-proc-address "eglUnbindWaylandDisplayWL"))
+  (setfnot *query-wayland-display* (get-proc-address "eglQueryWaylandBufferWL"))
+  (setfnot *image-target-texture-2DOES* (get-proc-address "glEGLImageTargetTexture2DOES"))
+  (setfnot *create-image-khr* (get-proc-address "eglCreateImageKHR")))
+
+(defun bind-wl-display (egl-display wl-display)
+  (foreign-funcall-pointer *bind-wayland-display* ()
+			   :pointer egl-display
+			   :pointer wl-display
+			   :void))
+
+(defun unbind-wl-display (egl-display wl-display)
   (foreign-funcall-pointer *bind-wayland-display* ()
 			   :pointer egl-display
 			   :pointer wl-display

@@ -19,10 +19,11 @@
    create-image
    destroy-image
    get-proc-address
-   init-egl-wayland
-   bind-wayland-display
+   bind-wl-display
+   unbind-wl-display
    query-wayland-buffer
    image-target-texture-2DOES
    create-image-khr
    eglintor
-   EGLenum))
+   EGLenum
+   load-egl-extensions))

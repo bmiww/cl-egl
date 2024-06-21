@@ -37,10 +37,12 @@
   (:color-buffer-type #x303F)
   (:rgb-buffer #x308E)
   (:egl-platform-gbm-khr #x31D7)
-  (:dma-buf-plane-fd-ext #x3272)
   (:linux-drm-fourcc-ext #x3271)
-  (:dma-buf-plane0-pitch-ext #x3274)
+
+  (:dma-buf-plane0-fd-ext #x3272)
   (:dma-buf-plane0-offset-ext #x3273)
+  (:dma-buf-plane0-pitch-ext #x3274)
+
 
   ;; ERROR CODES
   (:success #x3000)

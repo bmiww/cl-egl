@@ -16,14 +16,14 @@
    destroy-surface
    destroy-context
    terminate
-   create-image
-   destroy-image
    get-proc-address
    bind-wl-display
    unbind-wl-display
    query-wayland-buffer
    image-target-texture-2DOES
-   create-image-khr
    eglintor
    EGLenum
-   load-egl-extensions))
+   load-egl-extensions
+
+   create-image destroy-image
+   create-image-khr destroy-image-khr))

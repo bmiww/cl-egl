@@ -184,6 +184,7 @@
 (defvar *unbind-wayland-display* nil)
 (defvar *image-target-texture-2DOES* nil)
 (defvar *create-image-khr* nil)
+(defvar *destroy-image-khr* nil)
 
 (defmacro setfnot (place value)
   `(unless ,place (setf ,place ,value)))
@@ -193,7 +194,8 @@
   (setfnot *unbind-wayland-display* (get-proc-address "eglUnbindWaylandDisplayWL"))
   (setfnot *query-wayland-display* (get-proc-address "eglQueryWaylandBufferWL"))
   (setfnot *image-target-texture-2DOES* (get-proc-address "glEGLImageTargetTexture2DOES"))
-  (setfnot *create-image-khr* (get-proc-address "eglCreateImageKHR")))
+  (setfnot *create-image-khr* (get-proc-address "eglCreateImageKHR"))
+  (setfnot *destroy-image-khr* (get-proc-address "eglDestroyImageKHR")))
 
 (defun bind-wl-display (egl-display wl-display)
   (foreign-funcall-pointer *bind-wayland-display* ()
@@ -236,3 +238,9 @@
 			     :pointer buffer
 			     :pointer requested-attribs
 			     :pointer)))
+
+(defun destroy-image-khr (display image)
+  (foreign-funcall-pointer *destroy-image-khr* ()
+			   :pointer display
+			   :pointer image
+			   :bool))
